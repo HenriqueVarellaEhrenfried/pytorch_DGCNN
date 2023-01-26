@@ -15,6 +15,7 @@ from DGCNN_embedding import DGCNN
 from mlp_dropout import MLPClassifier, MLPRegression
 from sklearn import metrics
 from util import cmd_args, load_data
+from datetime import datetime
 
 class Classifier(nn.Module):
     def __init__(self, regression=False):
@@ -136,7 +137,8 @@ class Classifier(nn.Module):
 def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_args.batch_size):
     total_loss = []
     total_iters = (len(sample_idxes) + (bsize - 1) * (optimizer is None)) // bsize
-    pbar = tqdm(range(total_iters), unit='batch')
+    # pbar = tqdm(range(total_iters), unit='batch')
+    pbar = range(total_iters)
     all_targets = []
     all_scores = []
 
@@ -161,10 +163,10 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
 
         loss = loss.data.cpu().detach().numpy()
         if classifier.regression:
-            pbar.set_description('MSE_loss: %0.5f MAE_loss: %0.5f' % (loss, mae) )
+            # pbar.set_description('MSE_loss: %0.5f MAE_loss: %0.5f' % (loss, mae) )
             total_loss.append( np.array([loss, mae]) * len(selected_idx))
         else:
-            pbar.set_description('loss: %0.5f acc: %0.5f' % (loss, acc) )
+            # pbar.set_description('loss: %0.5f acc: %0.5f' % (loss, acc) )
             total_loss.append( np.array([loss, acc]) * len(selected_idx))
 
 
@@ -187,6 +189,10 @@ def loop_dataset(g_list, classifier, sample_idxes, optimizer=None, bsize=cmd_arg
     
     return avg_loss
 
+
+def timestamp():
+    now = datetime.now()
+    return now.strftime("[%d/%m/%Y %H:%M:%S] ")
 
 if __name__ == '__main__':
     print(cmd_args)
@@ -217,13 +223,13 @@ if __name__ == '__main__':
         avg_loss = loop_dataset(train_graphs, classifier, train_idxes, optimizer=optimizer)
         if not cmd_args.printAUC:
             avg_loss[2] = 0.0
-        print('\033[92maverage training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
+        print('\033[92m > %s average training of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (timestamp(), epoch, avg_loss[0], avg_loss[1], avg_loss[2]))
 
         classifier.eval()
         test_loss = loop_dataset(test_graphs, classifier, list(range(len(test_graphs))))
         if not cmd_args.printAUC:
             test_loss[2] = 0.0
-        print('\033[93maverage test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (epoch, test_loss[0], test_loss[1], test_loss[2]))
+        print('\033[93m >> %s average test of epoch %d: loss %.5f acc %.5f auc %.5f\033[0m' % (timestamp(), epoch, test_loss[0], test_loss[1], test_loss[2]))
 
     with open(cmd_args.data + '_acc_results.txt', 'a+') as f:
         f.write(str(test_loss[1]) + '\n')

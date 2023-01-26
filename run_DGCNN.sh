@@ -61,6 +61,16 @@ IMDBMULTI)
   learning_rate=0.0001
   sortpooling_k=0.9
   ;;
+MR-GOW-TAG-None)
+  num_epochs=30
+  learning_rate=0.0001
+  bsize=4
+;;
+MR-Order_Circular-TAG-None)
+  num_epochs=30
+  learning_rate=0.0001
+  bsize=4
+;;
 *)
   num_epochs=500
   learning_rate=0.00001
