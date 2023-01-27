@@ -14,7 +14,7 @@ import pdb
 from DGCNN_embedding import DGCNN
 from mlp_dropout import MLPClassifier, MLPRegression
 from sklearn import metrics
-from util import cmd_args, load_data
+from util import cmd_args, load_data, load_data2
 from datetime import datetime
 
 class Classifier(nn.Module):
@@ -200,7 +200,7 @@ if __name__ == '__main__':
     np.random.seed(cmd_args.seed)
     torch.manual_seed(cmd_args.seed)
 
-    train_graphs, test_graphs = load_data()
+    train_graphs, test_graphs = load_data2()
     print('# train: %d, # test: %d' % (len(train_graphs), len(test_graphs)))
 
     if cmd_args.sortpooling_k <= 1:

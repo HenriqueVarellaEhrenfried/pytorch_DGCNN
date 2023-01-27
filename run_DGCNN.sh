@@ -5,6 +5,7 @@ DATA="${1-MUTAG}"  # MUTAG, ENZYMES, NCI1, NCI109, DD, PTC, PROTEINS, COLLAB, IM
 fold=${2-1}  # which fold as testing data
 test_number=${3-0}  # if specified, use the last test_number graphs as test data
 
+
 # general settings
 gm=DGCNN  # model
 gpu_or_cpu=gpu
@@ -15,6 +16,7 @@ FP_LEN=0  # final dense layer's input dimension, decided by data
 n_hidden=128  # final dense layer's hidden size
 bsize=1  # batch size, set to 50 or 100 to accelerate training
 dropout=True
+build_folds='false'
 
 # dataset-specific settings
 case ${DATA} in
@@ -62,14 +64,16 @@ IMDBMULTI)
   sortpooling_k=0.9
   ;;
 MR-GOW-TAG-None)
-  num_epochs=30
+  num_epochs=1
   learning_rate=0.0001
   bsize=4
+  build_folds='true'
 ;;
 MR-Order_Circular-TAG-None)
   num_epochs=30
   learning_rate=0.0001
   bsize=4
+  build_folds='true'
 ;;
 *)
   num_epochs=500
@@ -95,7 +99,8 @@ if [ ${fold} == 0 ]; then
         -batch_size $bsize \
         -gm $gm \
         -mode $gpu_or_cpu \
-        -dropout $dropout
+        -dropout $dropout \
+        -build_folds $build_folds
   done
   stop=`date +%s`
   echo "End of cross-validation"
@@ -120,4 +125,5 @@ else
       -mode $gpu_or_cpu \
       -dropout $dropout \
       -test_number ${test_number}
+      -build_folds $build_folds
 fi
